@@ -2,6 +2,10 @@
 
 Flowr is a jquery plugin to show your content in a justified view. This plugin tries to emulate the way images are displayed on flickr's favorites and groups pages.
 
+### Demo
+
+http://kalyan02.github.com/flowr-js/
+
 ### Features
 
 1. Load content from a json into a justified view, all you need to do is pass original sizes.
