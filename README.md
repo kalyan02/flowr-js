@@ -9,17 +9,20 @@ Flowr is a jquery plugin to show your content in a justified view. This plugin t
 
 ### Example 1
 
-```$("#imageContainer").flowr({
+```
+$("#imageContainer").flowr({
 	data : jsonContent,
 	height : 240,
 	render : function(params) {
 		return "<img src='" + params.itemData.url + "' />";
 	},
-});```
+});
+```
 
 ### Example 2
 
-```$("#imageContainer").flowr({
+```
+$("#imageContainer").flowr({
 	data : jsonContent,
 	height : 240,
 	render : function(params) {
@@ -27,14 +30,17 @@ Flowr is a jquery plugin to show your content in a justified view. This plugin t
 	},
 	itemHeight : function(data) { return data.size.height; },
 	itemWidth : function(data) { return data.size.width; },
-});```
+});
+```
 
 ### Appending data
 
-```$("#imageContainer").flowr({
+```
+$("#imageContainer").flowr({
 	data : jsonContent,
 	append : true
-});```
+});
+```
 
 ### All options
 
