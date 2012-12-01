@@ -27,8 +27,8 @@
 			'itemWidth' : null,				// callback function for width
 			'itemHeight' : null,			// callback function for height
 			'complete' : null,				// complete callback
-			'rowClassName' : ROW_CLASS_NAME 
-
+			'rowClassName' : ROW_CLASS_NAME,
+			'rows' : -1 					// Maximum number of rows to render. -1 for no limit.
 		};
 		var settings = $.extend( DEFAULTS, options);
 
@@ -98,7 +98,7 @@
 					return (lineItems.length - 1 + extraPads) * settings.padding;
 				}
 
-				while( lineWidth + requiredPadding() < settings.maxWidth && (itemIndex < itemsLength-1) ) {
+				while( lineWidth + requiredPadding() < settings.maxWidth && (itemIndex < itemsLength) ) {
 					var itemData = data[ itemIndex ];
 					var itemWidth = settings.itemWidth.call( $this, itemData );
 					var itemHeight = settings.itemHeight.call( $this, itemData );
@@ -157,11 +157,15 @@
 			// Get a copy of original data. 1 level deep copy is sufficient.
 			var data = settings.data.slice(0);
 			var rowData = null;
-			
+			var currentRow = 0;
+			var currentItem = 0;
 			// While we have a new row
 			while( ( rowData = utils.getNextRow(data,settings) ) != null && rowData.data.length > 0 ) {
+				if( settings.rows > 0 && currentRow >= settings.rows )
+					break;
 				// remove the number of elements in the new row from the top of data stack
 				data.splice( 0, rowData.data.length );
+
 				// Create a new row div, add class, append the htmls and insert the flowy items
 				var $row = $('<div>').addClass(settings.rowClassName);
 				for( i=0; i<rowData.data.length; i++ ) {
@@ -175,10 +179,13 @@
 						.css( 'height', displayData.height )
 						.css( 'margin-left', i==0 ? '0' : settings.padding + "px" );	//TODO:Refactor
 					$row.append( displayObject );
+
+					currentItem++;
 				}
 				$this.append( $row );
 				// console.log ( "I> rowData.data.length="+rowData.data.length +"   rowData.width="+rowData.width );
 
+				currentRow++;
 				$this.data('lastRow', rowData );
 			}
 			// store the current state of settings and the items in last row
@@ -186,8 +193,14 @@
 			$this.data('lastSettings', settings );
 
 			// onComplete callback
-			if( typeof (settings.complete) == 'function' )
-				settings.complete.call( $this, null );
+			// pass back info about list of rows and items rendered
+			if( typeof (settings.complete) == 'function' ) {
+				var completeData = {
+					renderedRows : currentRow,
+					renderedItems : currentItem
+				}
+				settings.complete.call( $this, completeData );
+			}
 		});
 	};
 

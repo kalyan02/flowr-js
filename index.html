@@ -23,6 +23,7 @@
 
 var assets = ['images1.json','images2.json','images3.json','images4.json'];
 var asset_index = 0;
+var nextRenderList = [];
 
 $(document).ready(function(){
 	$.get("images1.json", function(jsonContent) {
@@ -42,9 +43,15 @@ $(document).ready(function(){
 				div.append(link);
 				return div;
 			},
+			rows : 2,		//Max number of rows to render
 			itemWidth : function(data) { return data.size.w; },
 			itemHeight : function(data) { return data.size.h; },
-			complete : function() {}
+			complete : function(params) {
+				if( jsonContent.length > params.renderedItems ) {
+					nextRenderList = jsonContent.slice( params.renderedItems );
+					console.log( nextRenderList.length )
+				}
+			}
 		});
 	});
 
@@ -53,6 +60,7 @@ $(document).ready(function(){
 		var json_file = assets[ asset_index%assets.length ];	// Just cycle thru the image json files
 
 		$.get(json_file, function(jsonContent) {
+			jsonContent = nextRenderList.concat( jsonContent );
 			$("#imageContainer").flowr({
 				data : jsonContent,
 				append : true,
