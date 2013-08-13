@@ -107,6 +107,14 @@
 					var minWidth = Math.floor( itemWidth * settings.height / itemHeight );
 
 					var newLineWidth = lineWidth + minWidth + requiredPadding(1);
+					
+			                if (minWidth > settings.maxWidth) {
+			                    // very short+wide images like panoramas
+			                    // show them even if ugly, as wide as possible
+			                    minWidth = settings.maxWidth-1;
+			                    minHeight = settings.height * minHeight / minWidth;
+			                }
+					
 					// console.log( 'lineWidth = ' + lineWidth );
 					// console.log( 'newLineWidth = ' + newLineWidth );
 					if( newLineWidth < settings.maxWidth ) {
