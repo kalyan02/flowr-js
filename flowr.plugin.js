@@ -162,7 +162,7 @@
 					width : testWidth + requiredPadding()
 				};
 			},	//getNextRow
-			reOrderContent : function(){
+			reorderContent : function(){
 				/*
 				 TODO: optimize for faster resizing by reusing dom objects instead of killing the dom
 				 */
