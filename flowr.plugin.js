@@ -13,7 +13,7 @@
 		$this = this;
 		var ROW_CLASS_NAME = 'flowr-row';	// Class name for the row of flowy
 		var MAX_LAST_ROW_GAP = 25;			// If the width of last row is lesser than max-width, recalculation is needed
-		var NO_COPY_FIELDS = [ 'complete', 'data' ];	// these attributes will not be carried forward for append related calls
+		var NO_COPY_FIELDS = [ 'complete', 'data', 'responsive' ];	// these attributes will not be carried forward for append related calls
 		var DEFAULTS = {
 			'data' : [],
 			'padding' : 5,					// whats the padding between flowy items
@@ -28,7 +28,8 @@
 			'itemHeight' : null,			// callback function for height
 			'complete' : null,				// complete callback
 			'rowClassName' : ROW_CLASS_NAME,
-			'rows' : -1 					// Maximum number of rows to render. -1 for no limit.
+			'rows' : -1, 					// Maximum number of rows to render. -1 for no limit.
+			'responsive' : true				// make content responsive
 		};
 		var settings = $.extend( DEFAULTS, options);
 
@@ -60,6 +61,9 @@
 			}
 		}
 
+		// only on the first initial call
+		if( !settings.responsive && !settings.append )
+			$this.width( $this.width() );
 
 		// Basic sanity checks
 		if( !(settings.data instanceof Array) )
@@ -107,6 +111,14 @@
 					var minWidth = Math.floor( itemWidth * settings.height / itemHeight );
 
 					var newLineWidth = lineWidth + minWidth + requiredPadding(1);
+					
+			                if (minWidth > settings.maxWidth) {
+			                    // very short+wide images like panoramas
+			                    // show them even if ugly, as wide as possible
+			                    minWidth = settings.maxWidth-1;
+			                    minHeight = settings.height * minHeight / minWidth;
+			                }
+					
 					// console.log( 'lineWidth = ' + lineWidth );
 					// console.log( 'newLineWidth = ' + newLineWidth );
 					if( newLineWidth < settings.maxWidth ) {
@@ -149,8 +161,46 @@
 					data : lineItems,
 					width : testWidth + requiredPadding()
 				};
-			}	//getNextRow
+			},	//getNextRow
+			reOrderContent : function(){
+				/*
+				 TODO: optimize for faster resizing by reusing dom objects instead of killing the dom
+				 */
+				var _initialWidth = $this.data('width');
+				var _newWidth = $this.width();
+				var _change = _initialWidth - _newWidth;
+
+				if(_initialWidth!=_newWidth) {
+					$this.html('');
+					var _settings = $this.data( 'lastSettings' );
+					_settings.data = $this.data( 'data' );
+					_settings.maxWidth = $this.width() - 1;
+					$this.flowr( _settings );
+				}
+			}
 		} //utils
+
+		// If the resposive var is set to true then listen for resize method
+		// and prevent resizing from happening twice if responsive is set again during append phase!
+		if( settings.responsive && !$this.data('__responsive') ) {
+			$(window).resize(function(){
+				initialWidth = $this.data('width');
+				newWidth = $this.width();
+
+				//initiate resize
+				if( initialWidth != newWidth ) {
+					var task_id = $this.data('task_id');
+					if( task_id ) {
+						task_id = clearTimeout( task_id );
+						task_id = null;
+					}
+					task_id = setTimeout( utils.reorderContent, 80 );
+					$this.data('task_id', task_id );
+				}
+			});
+			$this.data('__responsive',true);
+		}
+
 
 		return this.each(function(){
 
@@ -159,6 +209,14 @@
 			var rowData = null;
 			var currentRow = 0;
 			var currentItem = 0;
+
+			// Store all the data
+			var allData = $this.data( 'data' ) || [];
+			for(i=0;i<data.length;i++) {
+				allData.push( data[i] );
+			}
+			$this.data( 'data', allData );
+
 			// While we have a new row
 			while( ( rowData = utils.getNextRow(data,settings) ) != null && rowData.data.length > 0 ) {
 				if( settings.rows > 0 && currentRow >= settings.rows )
