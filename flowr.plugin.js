@@ -29,7 +29,7 @@
 			'complete' : null,				// complete callback
 			'rowClassName' : ROW_CLASS_NAME,
 			'rows' : -1, 					// Maximum number of rows to render. -1 for no limit.
-			'responsive' : true				// make content responsive
+			'responsive' : false			// make content responsive
 		};
 		var settings = $.extend( DEFAULTS, options);
 
